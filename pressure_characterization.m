@@ -540,8 +540,6 @@ writematrix(fuel_losses,filename,'Sheet',12,'Range','B2');
 
 % write other outputs to file %
 
-% ADD REQUIRED OX, FUEL, TOTAL PROP MASS AND TOTAL DRY MASS (COPV TANKS +
-% PRESSURANT)
 other_outputs = zeros(27,1);
 other_outputs(1,1) = pretank_losses(1,4); % F, pre reg temp
 other_outputs(2,1) = pretank_losses(1,1); % psia, pre reg pressure
