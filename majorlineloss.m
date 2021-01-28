@@ -2,7 +2,7 @@
 % Author: Elysse Lescarbeau, Date: 12/17/2020
 % Equations/methodology from www.engineersedge.com/fluid_flow/pressure_drop/pressure_drop.htm
 
-function [dP] = majorlineloss(mdot,tube_length,inner_diameter,tube_roughness,rho_1,viscosity)
+function [dP,v_1] = majorlineloss(mdot,tube_length,inner_diameter,tube_roughness,rho_1,viscosity)
 
 % mdot: lbm/s
 % tube_length: in
