@@ -122,7 +122,7 @@ for j = 1:size_mat_ox_posttank_comp(1)
 end
 
 for j= 1:size_mat_ox_posttank_line(1)
-    [ox_posttank_line_losses(j,1)] = majorlineloss(engine_ox_mdot,Ox_PostTank_Line_Info_Matrix(j,1),Ox_PostTank_Line_Info_Matrix(j,2),SS_tube_roughness,ox_density,ox_viscosity); % psid
+    [ox_posttank_line_losses(j,1),~] = majorlineloss(engine_ox_mdot,Ox_PostTank_Line_Info_Matrix(j,1),Ox_PostTank_Line_Info_Matrix(j,2),SS_tube_roughness,ox_density,ox_viscosity); % psid
 end
 
 total_ox_posttank_losses=sum(ox_posttank_component_losses)+sum(ox_posttank_line_losses); % psid
@@ -136,7 +136,7 @@ for j= 1:size_mat_fuel_posttank_comp(1)
 end
 
 for j= 1:size_mat_fuel_posttank_line(1)
-    [fuel_posttank_line_losses(j,1)] = majorlineloss(engine_fuel_mdot,Fuel_PostTank_Line_Info_Matrix(j,1),Fuel_PostTank_Line_Info_Matrix(j,2),SS_tube_roughness,fuel_density,fuel_viscosity); % psid
+    [fuel_posttank_line_losses(j,1),~] = majorlineloss(engine_fuel_mdot,Fuel_PostTank_Line_Info_Matrix(j,1),Fuel_PostTank_Line_Info_Matrix(j,2),SS_tube_roughness,fuel_density,fuel_viscosity); % psid
 end
 
 total_fuel_posttank_losses=sum(fuel_posttank_component_losses)+sum(fuel_posttank_line_losses); % psid
@@ -424,8 +424,11 @@ while convergence_vol == 0
                 burn_time = burn_time + .2;
         end
     end
+    
+    total_prop_mass = total_ox_mass + total_fuel_mass; % lbm
     ox_prop_volume = total_ox_mass/ox_density; % ft^3, final ox volume
     fuel_prop_volume = total_fuel_mass/fuel_density; % ft^3, final fuel volume
+    
     if (abs(ox_prop_volume - ox_prop_volume_guess)/ox_prop_volume_guess)*100 < 1 && (abs(fuel_prop_volume - fuel_prop_volume_guess)/fuel_prop_volume_guess)*100 < 1
         convergence_vol = 1;
     else
@@ -540,37 +543,41 @@ writematrix(fuel_losses,filename,'Sheet',12,'Range','B2');
 
 % write other outputs to file %
 
-other_outputs = zeros(27,1);
+other_outputs = zeros(30,1);
+
 other_outputs(1,1) = pretank_losses(1,4); % F, pre reg temp
 other_outputs(2,1) = pretank_losses(1,1); % psia, pre reg pressure
 other_outputs(3,1) = pretank_losses(1,1) - 14.7; % psig, pre reg pressure
-other_outputs(4,1) = reg_set_pressure; % psia
-other_outputs(5,1) = reg_set_pressure - 14.7; % psig
-other_outputs(6,1) = min_blowdown_pressure; % psia
-other_outputs(7,1) = min_blowdown_pressure - 14.7; % psia
+other_outputs(4,1) = min_blowdown_pressure; % psia
+other_outputs(5,1) = min_blowdown_pressure - 14.7; % psia
+other_outputs(6,1) = reg_set_pressure; % psia
+other_outputs(7,1) = reg_set_pressure - 14.7; % psig
 other_outputs(8,1) = ox_pressurant_mdot; % lbm/s, required ox pressurant mass flow rate
 other_outputs(9,1) = fuel_pressurant_mdot; % lbm/s, required fuel pressurant mass flow rate
 other_outputs(10,1) = total_pressurant_mdot; % lbm/s, required total pressurant mass flow rate
 other_outputs(11,1) = nominal_pressurant_mdot; % lbm/s, nominal HX mdot using bypass valve to bring outlet temp from 400F to 200F
-other_outputs(12,1) = GG_total_mdot; % lbm/s
-other_outputs(13,1) = pretank_losses(HXcount,4); % F, HX inlet temp
-other_outputs(14,1) = HX_tube_length; % in, length per tube
-other_outputs(15,1) = space_btwn_tubes; % in, radial spacing between tubing coils 
+other_outputs(12,1) = pretank_losses(HXcount,4); % F, HX inlet temp
+other_outputs(13,1) = HX_tube_length; % in, length per tube
+other_outputs(14,1) = space_btwn_tubes; % in, radial spacing between tubing coils 
+other_outputs(15,1) = GG_total_mdot; % lbm/s
 other_outputs(16,1) = ox_required_tank_pressure; % psia
 other_outputs(17,1) = ox_required_tank_pressure - 14.7; % psig
 other_outputs(18,1) = fuel_required_tank_pressure; % psia
 other_outputs(19,1) = fuel_required_tank_pressure - 14.7; % psig
-other_outputs(20,1) = ox_pressurant_mass; % lbm
-other_outputs(21,1) = fuel_pressurant_mass; % lbm
-other_outputs(22,1) = total_pressurant_mass; % lbm
-other_outputs(23,1) = total_num_COPVs_ox_tank;
-other_outputs(24,1) = total_num_COPVs_fuel_tank;
-other_outputs(25,1) = orifice_diameter; % in, trim orifice diameter
-other_outputs(26,1) = orifice_dP; % psid, pressure drop required across trim orifice
-other_outputs(27,1) = burn_time; % seconds
+other_outputs(20,1) = total_ox_mass; % lbm
+other_outputs(21,1) = total_fuel_mass; % lbm
+other_outputs(22,1) = total_prop_mass; % lbm
+other_outputs(23,1) = ox_pressurant_mass; % lbm
+other_outputs(24,1) = fuel_pressurant_mass; % lbm
+other_outputs(25,1) = total_pressurant_mass; % lbm
+other_outputs(26,1) = total_num_COPVs_ox_tank;
+other_outputs(27,1) = total_num_COPVs_fuel_tank;
+other_outputs(28,1) = orifice_diameter; % in, trim orifice diameter
+other_outputs(29,1) = orifice_dP; % psid, pressure drop required across trim orifice
+other_outputs(30,1) = burn_time; % seconds
 
 writematrix(other_outputs,filename,'Sheet',13,'Range','B2');
-writecell(orifice_side,filename,'Sheet',13,'Range','B29');
+writecell(orifice_side,filename,'Sheet',13,'Range','B32');
 
 
 
